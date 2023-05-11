@@ -15,6 +15,9 @@ import {
   Text,
   useColorScheme,
   View,
+  NativeModules,
+  requireNativeComponent,
+  HostComponent,
 } from 'react-native';
 
 import {
@@ -26,35 +29,17 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import Home from './src/Home';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+interface SsnTextElementProps {
+  style: Record<string, unknown>;
 }
+
+const SsnTextElement: HostComponent<SsnTextElementProps> =
+  requireNativeComponent('SsnTextElement');
+const {SsnTextElement: SsnTextElementModule} = NativeModules;
+
+const tokenize = () => SsnTextElementModule.tokenize() as Promise<string>;
+
+const dismissSsnKeyboard = () => SsnTextElementModule.dismissKeyboard() as void;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -71,6 +56,7 @@ function App(): JSX.Element {
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <Home />
+      <SsnTextElement style={styles.ssnTextElement} />
     </SafeAreaView>
   );
 }
@@ -91,6 +77,11 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  ssnTextElement: {
+    height: 50,
+    width: '100%',
+    marginBottom: 20,
   },
 });
 
